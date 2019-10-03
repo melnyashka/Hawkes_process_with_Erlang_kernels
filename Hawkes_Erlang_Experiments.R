@@ -11,14 +11,24 @@ flog.appender(appender.tee(file)) # write both to console and to file
 flog.threshold(DEBUG)        # By default set threshold to INFO (because I can)
 flog.debug("Debugging is on!") 
 
-n_pop = 2 # number of populations
-n_neur = c(100, 100) # number of neurons in population, vector of integers of length n_pop
-eta = c(3,2) # number of memory variables, vector of integers of length n_pop
-nu = c(1,1) # auxilliary constants
-c_rate = c(-1,1) # rates of population
+nb_pop = 2 # number of populations
+nb_neur = c(100, 100) # number of neurons in population, vector of integers of length n_pop
+eta_vec = c(3,2) # number of memory variables, vector of integers of length n_pop
+nu_vec = c(1,1) # auxilliary constants
+c_vec = c(-1,1) # rates of population
 K = c(10, 1) # constants for the rate functions
-delta_gen = 1e-4
-N_gen = round(60/delta_gen)
+delta_gen = 1e-2
+N_gen = round(70/delta_gen)
+  
+Z = hawkes_approximation(N = N_gen, delta = delta_gen, n_pop = nb_pop, n_neur = nb_neur, eta = eta_vec, nu = nu_vec, c_rate = c_vec, K = K)
 
-Z = hawkes_approximation(N = N_gen, delta = delta_gen, n_pop = n_pop, n_neur = n_neur, eta = eta, nu = nu, c_rate = c_rate, K = K)
-build_plot(Z, c(4,7))
+
+Z = hawkes_splitting(N = N_gen, delta = delta_gen, nb_pop, nb_neur, eta_vec, nu_vec, c_vec, K)
+time_elapsed = c(1:N_gen)*delta_gen
+build_plot(Z, time_elapsed, c(1,5))
+lines(time_elapsed, Z[1,], col = "black")
+# To plot intensities
+
+plot(time_elapsed, sapply(Z[5,], rate_function, const = 1), type = "l", lty = 1)
+lines(time_elapsed, sapply(Z[1,], rate_function, const = 10), col = "blue", lty=1)
+
