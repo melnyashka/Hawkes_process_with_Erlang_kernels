@@ -1,3 +1,8 @@
+#'
+#' Author of the code: Anna Melnykova (anna.melnykova at univ-grenoble-alpes.fr)
+#'
+library(expm)
+
 rate_function <- function(x, const=1){
   # here for simplicity we use the same family of functions
   if (x<log(20)){
@@ -46,7 +51,7 @@ hawkes_splitting <- function(N, delta, nb_pop, nb_neur, eta_vec, nu_vec, c_vec, 
       l = min(which(ind_rough >= ind)) # give a population
       if (ind+1 <= nb_total) {j = ind + 1} else {j = 1} # keep track on the next variable
       if (l+1 <= nb_pop) {l_ = l + 1} else {l_ = 1} # keep track on the index of population
-      z[ind] = z[ind] + delta*(-nu_vec[l]*z[ind] + c_vec[l]*rate_function(x = z[j], const = K[l_])) + c_vec[l]*sqrt(delta)*rnorm(1)*sqrt(rate_function(x = z[j], const = K[l_])/p_vec[l])
+      z[ind] = z[ind] + delta*c_vec[l]*rate_function(x = z[j], const = K[l_]) + c_vec[l]*sqrt(delta)*rnorm(1)*sqrt(rate_function(x = z[j], const = K[l_])/p_vec[l])
     } 
     Z[,i+1] = expAtv(A, z, delta/2)$eAtv #doing the last step
   }
