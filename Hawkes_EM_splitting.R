@@ -39,21 +39,21 @@ linear_ODE_matrix <- function(nu_vec, eta_vec)
 
 hawkes_splitting <- function(N, delta, nb_pop, nb_neur, eta_vec, nu_vec, c_vec, K){
   nb_total = nb_pop + sum(eta_vec)
-  Z = matrix(nrow = nb_total, ncol = N)
+  Z = matrix(nrow = N, ncol = nb_total)
   ind_rough = numeric(nb_pop) 
   A = linear_ODE_matrix(nu_vec, eta_vec+1)
   for (i in 1:nb_pop){ind_rough[i] = sum(eta_vec[1:i])+i}
-  Z[,1] = rep(0,nb_total)
+  Z[1,] = rep(0,nb_total)
   p_vec = sqrt(nb_neur*sum(nb_neur)) # proportions of the neurons in each population
   for (i in 1:(N-1)){
-    z = expAtv(A, Z[,i], delta/2)$eAtv # we are doing the first step of the approximation scheme
+    z = expAtv(A, Z[i,], delta/2)$eAtv # we are doing the first step of the approximation scheme
     for (ind in ind_rough){ # doing a step with the constant solution
       l = min(which(ind_rough >= ind)) # give a population
       if (ind+1 <= nb_total) {j = ind + 1} else {j = 1} # keep track on the next variable
       if (l+1 <= nb_pop) {l_ = l + 1} else {l_ = 1} # keep track on the index of population
       z[ind] = z[ind] + delta*c_vec[l]*rate_function(x = z[j], const = K[l_]) + c_vec[l]*sqrt(delta)*rnorm(1)*sqrt(rate_function(x = z[j], const = K[l_])/p_vec[l])
     } 
-    Z[,i+1] = expAtv(A, z, delta/2)$eAtv #doing the last step
+    Z[i+1,] = expAtv(A, z, delta/2)$eAtv #doing the last step
   }
   return(Z)
 }
