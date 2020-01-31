@@ -100,7 +100,7 @@ simul_Hawkes_Erlang<-function(nb_pop, nb_neuron, intensity_function, c_vec, nu_v
   return(list(spike_train = points[good_index], type = type[good_index], intensity = intensity[,good_index], X = X_in_time[,good_index]))
 }
 
-simul_Hawkes_Erlang_Anna <-function(nb_pop, nb_neuron, intensity_function, c_vec, nu_vec = rep(1,nb_pop), eta_vec, X_init, percent_small_ISI = 0.1, stop_time, bound_method = "polyroot", name = "")
+simul_Hawkes_Erlang_Anna <-function(nb_pop, nb_neuron, intensity_function, c_vec, nu_vec = rep(1,nb_pop), eta_vec, X_init, percent_small_ISI = 0.1, stop_time, bound_method = "polyroot")
 {
   # The function simulates the multiclass Hawkes process model of Ditlevsen and Locherbach (2016)
   # "nb_pop" is the number of sub-populations
@@ -189,8 +189,10 @@ simul_Hawkes_Erlang_Anna <-function(nb_pop, nb_neuron, intensity_function, c_vec
     }
   }
   
+  print(paste("We had ",round((sum(type == Inf)/i)*100, digits = 3),"% percents of too small time steps!"))
+  print(paste("We had ",round((1-j/i-sum(type==Inf)/i)*100, digits = 3),"% percent of rejections (not going in condition (2))"))
   # write.table(cbind(X,points), file = name, sep = ",", append = FALSE, col.names = FALSE, row.names = FALSE)
-  return(list(spike_train = points, type = type, intensity = intensity, X = X_in_time))
+  return(list(spike_train = points, type = type[type!=Inf], intensity = intensity, X = X_in_time))
 }
 
 
@@ -280,6 +282,7 @@ X_bound_root <- function(X, nu, Tmax)
   fact = factorial(0:n)
   roots = Re(polyroot((-nu*X+c(X[-1],0))/fact)) # Polynomial coeficients of the time derivative
   index = (roots<Tmax)&(roots>0)
+  # if (any(index)){print(paste("Obtained time: ", unique(roots[index]), "Tmax = ", Tmax))}
   interest_times = c(unique(roots[index]), Tmax)
   k = length(interest_times)
   values = rep(0,k)
@@ -287,6 +290,7 @@ X_bound_root <- function(X, nu, Tmax)
   {
     values[i] = exp(-nu*interest_times[i])*sum(X*interest_times[i]^(0:n)/fact)
   }
+  # if (any(index)){print(paste("First value:", X[1],"Computed value:", values))}
   return( max(X[1], values) )
 }
 
